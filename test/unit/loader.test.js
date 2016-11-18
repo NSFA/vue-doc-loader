@@ -1,0 +1,1 @@
+var testMarkdown = require('./markdown.md');

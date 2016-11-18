@@ -1,6 +1,6 @@
 'use strict';
 /**
- * vueLoader
+ * vueLoader Component
  * config code block
  *
  * @author:   波比(｡･∀･)ﾉﾞ
@@ -10,88 +10,24 @@
 const EventEmitter = require('events').EventEmitter;
 const cheerio = require('cheerio');
 const path = require('path');
-const hljs = require('highlight.js');
 const markdown = require('markdown-it');
-
-
-
-let genId = (function(){
-	let cache = {},
-		fileUid = 1;
-	return function(file){
-		return cache[file] || (cache[file] = fileUid++)
-	}
-
-})()
-
-
-
-let wrap = function(render){
-	return function(){
-		return render.apply(this, arguments)
-			.replace('<code class="', '<code class="hljs ')
-			.replace('<code>', '<code class="hljs">');
-	}
-};
-let striptags = function(str, tags) {
-	var $ = cheerio.load(str, {decodeEntities: false});
-
-	if (!tags || tags.length === 0) {
-		return str;
-	}
-
-	tags = !Array.isArray(tags) ? [tags] : tags;
-	var len = tags.length;
-
-	while (len--) {
-		$(tags[len]).remove();
-	}
-
-	return $.html();
-};
-
-let convert = function(str) {
-	str = str.replace(/(&#x)(\w{4});/gi, function($0) {
-		return String.fromCharCode(parseInt(encodeURIComponent($0).replace(/(%26%23x)(\w{4})(%3B)/g, '$2'), 16));
-	});
-	return str;
-};
-
-/**
- * `{{ }}` => `<span>{{</span> <span>}}</span>`
- * @param  {string} str
- * @return {string}
- */
-let replaceDelimiters = function (str) {
-	return str.replace(/({{|}})/g, '<span>$1</span>')
-}
-
-/**
- * renderHighlight
- * @param  {string} str
- * @param  {string} lang
- */
-let renderHighlight = function (str, lang) {
-	if (!(lang && hljs.getLanguage(lang))) {
-		return ''
-	}
-
-	try {
-		return replaceDelimiters(hljs.highlight(lang, str, true).value)
-	} catch (err) {}
-}
-
+const util = require('./util.js');
+const fs = require('fs');
+const fse = require('fs-extra');
 
 
 class VueLoader extends EventEmitter{
 	constructor(options){
 		options = options || {};
 		super(options);
-		this.options = options = Object.assign(options, {
+
+		console.log(options);
+		this.options = options = Object.assign({
 			preset : 'default',
 			html : true,
-			highlight : renderHighlight
-		});
+			highlight : util.renderHighlight,
+			doc : 'ysfdoc'
+		},options);
 
 
 		this.md = markdown(options.preset, options);
@@ -104,18 +40,22 @@ class VueLoader extends EventEmitter{
 		this.rewriteRender();
 	}
 	addPlugin(){
-		var that = this;
-		this.md.use(require('markdown-it-container'), 'ysfdoc', {
+		var that = this,
+			options = this.options;
+
+		var reg = new RegExp('^'+options.doc+'\\s*(.*)$');
+
+		this.md.use(require('markdown-it-container'), options.doc, {
 
 			validate: function(params) {
-				return params.trim().match(/^ysfdoc\s*(.*)$/);
+				return params.trim().match(reg);
 			},
 
 			render: function(tokens, idx) {
-				var m = tokens[idx].info.trim().match(/^ysfdoc\s*(.*)$/);
+				var m = tokens[idx].info.trim().match(reg);
 				if (tokens[idx].nesting === 1) {
 					var description = (m && m.length > 1) ? m[1] : '';
-					var html = convert(striptags(tokens[idx + 1].content, 'script'));
+					var html = util.convert(util.striptags(tokens[idx + 1].content, 'script'));
 					var descriptionHTML = description
 						? '<div class="description">' + that.md.render(description) + '</div>'
 						: '';
@@ -133,7 +73,7 @@ class VueLoader extends EventEmitter{
 	rewriteRender(){
 		var codeInlineRender = this.md.renderer.rules.code_inline;
 
-		this.md.renderer.rules.fence = wrap(this.md.renderer.rules.fence);
+		this.md.renderer.rules.fence = util.wrap(this.md.renderer.rules.fence);
 
 		this.md.renderer.rules.table_open = function(){
 			return '<table class="table">';
@@ -169,6 +109,15 @@ class VueLoader extends EventEmitter{
 			output.script;
 
 		return result
+	}
+
+	renderVuePath(source){
+		let file = path.resolve(process.cwd(), this.options.path, util.genId()+'.vue');
+
+		fse.outputFileSync(file, this.renderMarkdown(source));
+
+		return file;
+
 	}
 }
 

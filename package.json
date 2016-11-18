@@ -1,0 +1,28 @@
+{
+  "name": "vue-doc-loader",
+  "version": "0.0.2",
+  "description": "Document loader for webpack",
+  "main": "./src/loader.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NSFA/vue-doc-loader.git"
+  },
+  "bugs": {
+    "url": "https://github.com/NSFA/vue-doc-loader/issues"
+  },
+  "homepage": "https://github.com/NSFA/vue-doc-loader#readme",
+  "keywords": [
+    "vue-doc-loader",
+    "markdown",
+    "document",
+    "NSFA"
+  ],
+  "devDependencies": {
+    "markdown-it": "^8.1.0",
+    "markdown-it-container": "^2.0.0",
+    "cheerio": "^0.22.0",
+    "highlight.js": "^9.8.0"
+  },
+  "author": "波比(｡･∀･)ﾉﾞ",
+  "license": "MIT"
+}

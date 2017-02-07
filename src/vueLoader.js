@@ -20,8 +20,6 @@ class VueLoader extends EventEmitter{
 	constructor(options){
 		options = options || {};
 		super(options);
-
-		console.log(options);
 		this.options = options = Object.assign({
 			preset : 'default',
 			html : true,
@@ -55,7 +53,7 @@ class VueLoader extends EventEmitter{
 				var m = tokens[idx].info.trim().match(reg);
 				if (tokens[idx].nesting === 1) {
 					var description = (m && m.length > 1) ? m[1] : '';
-					var html = util.convert(util.striptags(tokens[idx + 1].content, 'script'));
+					var html = util.convert(tokens[idx + 1].content);
 					var descriptionHTML = description
 						? '<div class="description">' + that.md.render(description) + '</div>'
 						: '';

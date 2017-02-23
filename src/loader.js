@@ -11,7 +11,7 @@ const loaderUtils = require('loader-utils')
 
 module.exports = function(source){
 	this.cacheable();
-	let queryObj = loaderUtils.parseQuery(this.query) || {};
+	let queryObj = loaderUtils.getOptions(this.query) || {};
 
 
 	let entry = new VueLoader(Object.assign({
@@ -28,5 +28,3 @@ module.exports = function(source){
 		loaderUtils.stringifyRequest(this, '!!vue-loader!' + filePath) +
 		');'
 }
-
-

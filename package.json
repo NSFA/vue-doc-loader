@@ -1,6 +1,6 @@
 {
   "name": "vue-doc-loader",
-  "version": "0.0.5",
+  "version": "0.0.7",
   "description": "Document loader for webpack",
   "main": "./src/loader.js",
   "repository": {
@@ -17,11 +17,12 @@
     "document",
     "NSFA"
   ],
-  "devDependencies": {
+  "dependencies": {
     "markdown-it": "^8.1.0",
     "markdown-it-container": "^2.0.0",
     "cheerio": "^0.22.0",
-    "highlight.js": "^9.8.0"
+    "highlight.js": "^9.8.0",
+    "loader-utils" : "^1.0.2"
   },
   "author": "波比(｡･∀･)ﾉﾞ",
   "license": "MIT"
